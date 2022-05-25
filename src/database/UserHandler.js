@@ -2,6 +2,8 @@ const { DatabaseHandler } = require('./DatabaseHandler');
 const { MessageHandler } = require('./MessageHandler');
 const { databaseConfig } = require('./Config');
 
+const { UserNotFoundException } = require('./exception/UserNotFoundException');
+
 class UserHandler {
     _databaseHandler;
 
@@ -41,9 +43,14 @@ class UserHandler {
             .bind('username', username)
             .execute();
 
-        const userid = await useridCursor.fetchOne()[0];
+        const userid = await useridCursor.fetchOne();
 
-        return userid;
+        if (!userid) {
+            throw new UserNotFoundException(username)
+        }
+
+
+        return userid[0];
     }
 
     async validateUser(username, password) {

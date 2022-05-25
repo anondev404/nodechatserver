@@ -3,6 +3,7 @@ const { UserHandler } = require('../database/UserHandler');
 const express = require('express');
 
 const session = require('express-session');
+const { UserNotFoundException } = require('../database/exception/UserNotFoundException');
 
 const uuidv4 = require('uuid').v4;
 
@@ -117,6 +118,14 @@ app.post('/sendMessage', userSessionLoginValidation,
         } catch (err) {
             console.log(err);
 
+            //user to send message does not exits
+            if (err instanceof UserNotFoundException) {
+                res.send({
+                    message: err.message
+                });
+                return;
+            }
+
             res.send({
                 message: 'OOPS! Message not sent'
             });
@@ -141,11 +150,19 @@ app.get('/viewMessages', userSessionLoginValidation,
         } catch (err) {
             console.log(err);
 
+            //user to send message does not exits
+            if (err instanceof UserNotFoundException) {
+                res.send({
+                    message: err.message
+                });
+                return;
+            }
+
             res.send({
                 message: 'OOPS! Failed to fetch messages'
             });
         }
-    })
+    });
 
 
 
