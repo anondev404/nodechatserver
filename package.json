@@ -19,6 +19,7 @@
   "homepage": "https://github.com/anondev404/nodechatserver#readme",
   "devDependencies": {
     "axios": "^0.27.2",
+    "debug": "^4.3.4",
     "express": "^4.18.1"
   },
   "dependencies": {
