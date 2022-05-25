@@ -10,28 +10,36 @@ class UserHandler {
     }
 
     async _getDatabaseHandler() {
-        if (!this._databaseHandler) this._databaseHandler = await DatabaseHandler.getHandler();
+        if (this._databaseHandler) {
+            console.log(this._databaseHandler.isConnectionOpen)
+            if (this._databaseHandler.isConnectionOpen) {
+                return this._databaseHandler;
+            }
+        }
+
+        //calling handler opens new connection to the database
+        this._databaseHandler = await DatabaseHandler.getHandler();
 
         return this._databaseHandler;
     }
 
     async _table() {
         //gets USERCRED table from database
-        let dHandler = await this._getDatabaseHandler();
+        const dHandler = await this._getDatabaseHandler();
+
         return await dHandler.schema.getTable(databaseConfig.schema.table.usercred);
     }
 
     async _getUserId(username) {
-        let usercredTable = await this._table();
+        const usercredTable = await this._table();
 
-        let userid = await usercredTable
+        const useridCursor = await usercredTable
             .select('user_id')
             .where('username = :username')
             .bind('username', username)
-            .execute()
-            .fetchOne()[0];
+            .execute();
 
-        await this._getDatabaseHandler.close();
+        const userid = await useridCursor.fetchOne()[0];
 
         return userid;
     }
@@ -40,7 +48,7 @@ class UserHandler {
         let usercredTable = await this._table();
 
         const dHandler = await this._getDatabaseHandler();
-        dHandler.startTransaction();
+        await dHandler.startTransaction();
 
         try {
             //todo: username, password not parsed
@@ -51,34 +59,41 @@ class UserHandler {
 
             console.log('user created');
 
-            dHandler.session.commit();
+            await dHandler.session.commit();
         } catch (err) {
             console.error('failed: user not created');
-            dHandler.session.rollback();
+
+            await dHandler.session.rollback();
         }
 
-        await dHandler.close();
+        await this._closeConnection();
     }
 
     async fetchAllUsers() {
         let usercredTable = await this._table();
 
-        let tableData = await usercredTable
+        let userCursor = await usercredTable
             .select()
             .execute();
 
-        console.log(tableData);
+        console.log(userCursor);
 
-        await this._getDatabaseHandler.close();
-
-        return tableData;
+        return userCursor;
     }
 
     async getConverstation(user1, user2) {
         const userid1 = await this._getUserId(user1);
         const userid2 = await this._getUserId(user2);
 
+        await this._closeConnection();
+
         return MessageHandler.getConversation(userid1, userid2);
+    }
+
+    async _closeConnection() {
+        const dHandler = await this._getDatabaseHandler();
+
+        await dHandler.close();
     }
 }
 

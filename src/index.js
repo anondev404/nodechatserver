@@ -18,7 +18,7 @@ const moment = require('moment');
 
 sendMessage('xyz1', 'xyz', 'hello');*/
 
-UserHandler.getConverstation('xyz', 'xyz1')
+UserHandler.getHandler().getConverstation('xyz', 'xyz1')
     .then(async (data) => {
         let timeLog1 = (await data.fetchOne())[3];
         console.log(timeLog1);
