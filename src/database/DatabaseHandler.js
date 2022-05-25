@@ -1,8 +1,6 @@
 const mysqlx = require('@mysql/xdevapi');
 const { databaseConfig } = require('./Config');
 
-const debug = require('debug')('DatabaseHandler');
-
 class DatabaseHandler {
     _session;
     _schema;
