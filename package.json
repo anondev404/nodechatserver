@@ -23,6 +23,7 @@
     "express": "^4.18.1"
   },
   "dependencies": {
-    "@mysql/xdevapi": "8.0.29"
+    "@mysql/xdevapi": "8.0.29",
+    "moment": "^2.29.3"
   }
 }

@@ -15,6 +15,10 @@ class MessageHandler {
 
         try {
             //todo: username, password not parsed
+
+            let dHandler = await MessageHandler.databaseHandler;
+            dHandler.session.startTransaction();
+
             await messagerecTable
                 .insert('sender_user_id', 'receiver_user_id', 'message')
                 .values(sender, receiver, message)
@@ -22,10 +26,28 @@ class MessageHandler {
 
             console.log('message recored');
 
+            dHandler.session.commit();
         } catch (err) {
             console.debug(err);
             console.error('failed: message not recorded');
+
+            dHandler.session.rollback();
         }
+    }
+
+    static async getConversation(userid1, userid2) {
+        let messagerecTable = await MessageHandler.table();
+
+        let conversationCursor = await messagerecTable
+            .select('sender_user_id', 'receiver_user_id', 'message', 'timelog')
+            .where('sender_user_id in (:userid1, :userid2) or receiver_user_id in (:userid1, :userid2)')
+            .orderBy('timelog desc')
+            .bind('userid1', userid1)
+            .bind('userid2', userid2)
+            .execute();
+
+        //console.log(conversationCursor.fetchAll());
+        return conversationCursor;
     }
 }
 

@@ -5,13 +5,7 @@ class DatabaseHandler {
     _session;
     _schema;
 
-    static _databaseHandler;
-
-    constructor() {
-        DatabaseHandler._databaseHandler = this;
-    }
-
-    async init() {
+    async _init() {
         await this._setSession();
         await this._setSchema();
         console.log('database initilized');
@@ -44,16 +38,16 @@ class DatabaseHandler {
     }
 
     static async getHandler() {
-        if (this._databaseHandler) {
-            return this._databaseHandler;
-        }
-
         let handler = new DatabaseHandler();
-        await handler.init();
+        await handler._init();
 
         console.log('databasehandler initilized');
 
         return handler;
+    }
+
+    async close() {
+        await this._databaseHandler.close();
     }
 }
 
