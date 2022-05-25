@@ -1,0 +1,27 @@
+{
+  "name": "nodechatserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anondev404/nodechatserver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anondev404/nodechatserver/issues"
+  },
+  "homepage": "https://github.com/anondev404/nodechatserver#readme",
+  "devDependencies": {
+    "axios": "^0.27.2",
+    "express": "^4.18.1"
+  },
+  "dependencies": {
+    "@mysql/xdevapi": "8.0.29"
+  }
+}
