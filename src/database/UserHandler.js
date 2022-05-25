@@ -46,6 +46,32 @@ class UserHandler {
         return userid;
     }
 
+    async validateUser(username, password) {
+        //password accepted as clear text
+
+        let usercredTable = await this._table();
+
+        try {
+            const useridCursor = await usercredTable
+                .select('count(user_id)')
+                .where('username = :username and password = :password')
+                .bind('username', username)
+                .bind('password', password)
+                .execute();
+
+            if (useridCursor.fetchAll().length === 1) {
+                return 1;
+            } else {
+                return 0;
+            }
+
+        } catch (err) {
+            console.log(err);
+
+            return -1;
+        }
+    }
+
     async createUser(username, password) {
         console.log('creating user');
         let usercredTable = await this._table();

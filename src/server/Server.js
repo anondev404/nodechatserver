@@ -2,12 +2,58 @@ const { UserHandler } = require('../database/UserHandler');
 
 const express = require('express');
 
+const session = require('express-session');
+
+const uuidv4 = require('uuid').v4;
+
 const app = express();
 
 //using express json middleware
 app.use(express.json());
 
+app.use(session({
+    name: 'chatserver',
+    secret: 'chatserver',
+    genid: () => {
+        return uuidv4();
+    },
+    cookie: {
+        path: '/',
+        maxAge: 604800000,
+        httpOnly: true,
+    }
+}));
+
 const port = 3000;
+
+app.get('/signIn', async function (req, res) {
+    const cred = req.body;
+    console.log(cred.username);
+    try {
+        let flag = await UserHandler.getHandler().validateUser(cred.username, cred.password);
+        if (flag === 1) {
+
+            res.send({
+                message: 'Welcome to chatserver'
+            });
+        } else {
+            if (flag === 0) {
+
+                res.send({
+                    message: 'Invalid username or password'
+                });
+            } else {
+                throw new Error('SIGNIN FAILED');
+            }
+        }
+    } catch (err) {
+        console.log(err);
+
+        res.send({
+            message: 'OOPS! cannot signin'
+        });
+    }
+});
 
 app.post('/signUp', async function (req, res) {
     const cred = req.body;
