@@ -31,7 +31,7 @@ class MessageHandler {
         return await dHandler.schema.getTable(databaseConfig.schema.table.messagerec);
     }
 
-    async createMessage(sender, receiver, message) {
+    async createMessage(senderid, receiverid, message) {
         let messagerecTable = await this.table();
 
         let dHandler = await this._getDatabaseHandler();
@@ -41,7 +41,7 @@ class MessageHandler {
             //todo: sender, receiver, message not parsed
             await messagerecTable
                 .insert('sender_user_id', 'receiver_user_id', 'message')
-                .values(sender, receiver, message)
+                .values(senderid, receiverid, message)
                 .execute();
 
             console.log('message recorded');

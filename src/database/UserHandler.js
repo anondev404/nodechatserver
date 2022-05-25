@@ -55,26 +55,32 @@ class UserHandler {
 
         try {
             //todo: username, password not parsed
-            await usercredTable
+            const sqlRes = await usercredTable
                 .insert('username', 'password')
                 .values(username, password)
                 .execute();
 
-            console.log('user created');
-
             await dHandler.session.commit();
 
+            //on acct created
             return 1;
         } catch (err) {
-            console.error('failed: user not created');
+            console.log(err);
+
+            if (err.info) {
+                if (err.info.code === 1062) {
+                    //acct info already exits in database
+                    return 0;
+                }
+            }
 
             await dHandler.session.rollback();
 
+            //on other reasonn acct creation failure
             return -1;
         } finally {
             await this._closeConnection();
         }
-
     }
 
     async fetchAllUsers() {
@@ -91,9 +97,9 @@ class UserHandler {
         return userCursor;
     }
 
-    async getConverstation(user1, user2) {
-        const userid1 = await this._getUserId(user1);
-        const userid2 = await this._getUserId(user2);
+    async getConverstation(username1, username2) {
+        const userid1 = await this._getUserId(username1);
+        const userid2 = await this._getUserId(username2);
 
 
         await this._closeConnection();
@@ -101,6 +107,17 @@ class UserHandler {
         let msgHanlder = MessageHandler.getHandler();
 
         return await msgHanlder.getConversation(userid1, userid2);
+    }
+
+    async sendMessage(senderUsername, receiverUsername, message) {
+        const senderUserId = await this._getUserId(senderUsername);
+        const receiverUserId = await this._getUserId(receiverUsername);
+
+        await this._closeConnection();
+
+        let msgHanlder = MessageHandler.getHandler();
+
+        return await msgHanlder.createMessage(senderUserId, receiverUserId, message);
     }
 
     _resetDatabaseHandler() {
