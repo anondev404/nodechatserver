@@ -20,8 +20,11 @@ sendMessage('xyz1', 'xyz', 'hello');*/
 
 UserHandler.getHandler().getConverstation('xyz', 'xyz1')
     .then(async (data) => {
-        let timeLog1 = (await data.fetchOne())[3];
+        /*let timeLog1 = (await data.fetchOne())[3];
         console.log(timeLog1);
         let f = moment(timeLog1).format("dddd, MMMM Do YYYY, h:mm:ss a");
         console.log(f);
+
+        console.log(data);*/
+        console.log(await data.fetchAll());
     });

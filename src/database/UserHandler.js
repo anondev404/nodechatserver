@@ -11,7 +11,9 @@ class UserHandler {
 
     async _getDatabaseHandler() {
         if (this._databaseHandler) {
-            console.log(this._databaseHandler.isConnectionOpen)
+
+            console.log(this._databaseHandler.isConnectionOpen);
+
             if (this._databaseHandler.isConnectionOpen) {
                 return this._databaseHandler;
             }
@@ -64,9 +66,10 @@ class UserHandler {
             console.error('failed: user not created');
 
             await dHandler.session.rollback();
+        } finally {
+            await this._closeConnection();
         }
 
-        await this._closeConnection();
     }
 
     async fetchAllUsers() {
@@ -78,6 +81,8 @@ class UserHandler {
 
         console.log(userCursor);
 
+        await this._closeConnection();
+
         return userCursor;
     }
 
@@ -85,15 +90,24 @@ class UserHandler {
         const userid1 = await this._getUserId(user1);
         const userid2 = await this._getUserId(user2);
 
+
         await this._closeConnection();
 
-        return MessageHandler.getConversation(userid1, userid2);
+        let msgHanlder = MessageHandler.getHandler();
+
+        return await msgHanlder.getConversation(userid1, userid2);
+    }
+
+    _resetDatabaseHandler() {
+        this._databaseHandler = null;
     }
 
     async _closeConnection() {
-        const dHandler = await this._getDatabaseHandler();
-
-        await dHandler.close();
+        if (this._databaseHandler) {
+            await this._databaseHandler.close();
+            this._resetDatabaseHandler();
+            console.log('closing connection uh')
+        }
     }
 }
 
