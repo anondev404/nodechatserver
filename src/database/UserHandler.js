@@ -47,10 +47,11 @@ class UserHandler {
     }
 
     async createUser(username, password) {
+        console.log('creating user');
         let usercredTable = await this._table();
 
         const dHandler = await this._getDatabaseHandler();
-        await dHandler.startTransaction();
+        await dHandler.session.startTransaction();
 
         try {
             //todo: username, password not parsed
@@ -62,10 +63,14 @@ class UserHandler {
             console.log('user created');
 
             await dHandler.session.commit();
+
+            return 1;
         } catch (err) {
             console.error('failed: user not created');
 
             await dHandler.session.rollback();
+
+            return -1;
         } finally {
             await this._closeConnection();
         }
