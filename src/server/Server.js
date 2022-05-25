@@ -6,14 +6,18 @@ const session = require('express-session');
 
 const uuidv4 = require('uuid').v4;
 
+const uuidv5 = require('uuid').v5;
+
 const app = express();
+
+const port = 3000;
 
 //using express json middleware
 app.use(express.json());
 
 app.use(session({
     name: 'chatserver',
-    secret: 'chatserver',
+    secret: uuidv5('www.myownchatserver.com', uuidv5.URL),
     genid: () => {
         return uuidv4();
     },
@@ -24,7 +28,7 @@ app.use(session({
     }
 }));
 
-const port = 3000;
+
 
 app.get('/signIn', async function (req, res) {
     const cred = req.body;
@@ -60,7 +64,7 @@ app.get('/signIn', async function (req, res) {
 
 app.post('/signUp', async function (req, res) {
     const cred = req.body;
-    console.log(cred.username);
+
     try {
         let flag = await UserHandler.getHandler().createUser(cred.username, cred.password);
 
@@ -122,6 +126,7 @@ app.post('/sendMessage', userSessionLoginValidation,
 app.get('/viewMessages', userSessionLoginValidation,
     async function (req, res) {
         const info = req.body;
+
         try {
             const conversationCursor = await UserHandler
                 .getHandler()
