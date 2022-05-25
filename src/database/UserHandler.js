@@ -60,14 +60,19 @@ class UserHandler {
                 .execute();
 
             if (useridCursor.fetchAll().length === 1) {
+
+                //1 returned when username, password is matched in database
                 return 1;
             } else {
+
+                //0 is returned when username, password does not match in database
                 return 0;
             }
 
         } catch (err) {
             console.log(err);
 
+            //-1 is returned halted due to some other exception
             return -1;
         }
     }

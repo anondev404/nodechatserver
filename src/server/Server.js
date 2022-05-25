@@ -33,6 +33,9 @@ app.get('/signIn', async function (req, res) {
         let flag = await UserHandler.getHandler().validateUser(cred.username, cred.password);
         if (flag === 1) {
 
+            //saving the username in session data
+            req.session.username = cred.username;
+
             res.send({
                 message: 'Welcome to chatserver'
             });
@@ -60,12 +63,15 @@ app.post('/signUp', async function (req, res) {
     console.log(cred.username);
     try {
         let flag = await UserHandler.getHandler().createUser(cred.username, cred.password);
+
         if (flag === 1) {
+
             res.send({
                 message: 'Account Created'
             });
         } else {
             if (flag === 0) {
+
                 res.send({
                     message: 'Account already exits'
                 });
@@ -75,52 +81,66 @@ app.post('/signUp', async function (req, res) {
         }
     } catch (err) {
         console.log(err);
+
         res.send({
             message: 'OOPS! cannot create your account'
         });
     }
 });
 
-app.post('/sendMessage', async function (req, res) {
-    const info = req.body;
-    try {
-        await UserHandler
-            .getHandler()
-            .sendMessage(info.senderUsername, info.receiverUsername, info.message);
-
-        res.send({
-            message: 'Message sent successfully'
-        });
-    } catch (err) {
-        console.log(err);
-
-        res.send({
-            message: 'OOPS! Message not sent'
-        });
+const userSessionLoginValidation = (req, res, next) => {
+    if (req.session.username) {
+        next();
+        return;
     }
-});
 
-app.get('/viewMessages', async function (req, res) {
-    const info = req.body;
-    try {
-        const conversationCursor = await UserHandler
-            .getHandler()
-            .getConverstation(info.senderUsername, info.receiverUsername);
+    res.send({
+        message: 'User not recognized. Please signin.'
+    });
+}
 
-        const messages = await conversationCursor.fetchAll();
+app.post('/sendMessage', userSessionLoginValidation,
+    async function (req, res) {
+        const info = req.body;
+        try {
+            await UserHandler
+                .getHandler()
+                .sendMessage(info.senderUsername, info.receiverUsername, info.message);
 
-        res.send({
-            allConverstation: messages,
-            messages: 'All messages fetched'
-        });
-    } catch (err) {
-        console.log(err);
+            res.send({
+                message: 'Message sent successfully'
+            });
+        } catch (err) {
+            console.log(err);
 
-        res.send({
-            message: 'OOPS! Failed to fetch messages'
-        });
-    }
-})
+            res.send({
+                message: 'OOPS! Message not sent'
+            });
+        }
+    });
+
+app.get('/viewMessages', userSessionLoginValidation,
+    async function (req, res) {
+        const info = req.body;
+        try {
+            const conversationCursor = await UserHandler
+                .getHandler()
+                .getConverstation(info.senderUsername, info.receiverUsername);
+
+            const messages = await conversationCursor.fetchAll();
+
+            res.send({
+                allConverstation: messages,
+                messages: 'All messages fetched'
+            });
+        } catch (err) {
+            console.log(err);
+
+            res.send({
+                message: 'OOPS! Failed to fetch messages'
+            });
+        }
+    })
 
 
 
