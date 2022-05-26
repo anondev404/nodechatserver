@@ -62,7 +62,7 @@ class MessageHandler {
 
         let conversationCursor = await messagerecTable
             .select('sender_user_id', 'receiver_user_id', 'message', 'timelog')
-            .where('sender_user_id in (:userid1, :userid2) or receiver_user_id in (:userid1, :userid2)')
+            .where('sender_user_id in (:userid1, :userid2) and receiver_user_id in (:userid1, :userid2)')
             .orderBy('timelog desc')
             .bind('userid1', userid1)
             .bind('userid2', userid2)

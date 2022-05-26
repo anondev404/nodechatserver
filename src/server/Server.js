@@ -97,7 +97,7 @@ app.post('/signUp', async function (req, res) {
 const userSessionLoginValidation = (req, res, next) => {
     /*next();
     return;*/
-    
+
     if (req.session.username) {
         next();
         return;
@@ -114,7 +114,7 @@ app.post('/sendMessage', userSessionLoginValidation,
         try {
             await UserHandler
                 .getHandler()
-                .sendMessage(info.senderUsername, info.receiverUsername, info.message);
+                .sendMessage(req.session.username, info.receiverUsername, info.message);
 
             res.send({
                 message: 'Message sent successfully'
@@ -143,7 +143,7 @@ app.get('/viewMessages', userSessionLoginValidation,
         try {
             const conversationCursor = await UserHandler
                 .getHandler()
-                .getConverstation(info.senderUsername, info.receiverUsername);
+                .getConverstation(req.session.username, info.receiverUsername);
 
             const messages = await conversationCursor.fetchAll();
 
