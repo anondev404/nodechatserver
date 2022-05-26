@@ -43,14 +43,15 @@ class UserHandler {
             .bind('username', username)
             .execute();
 
-        const userid = await useridCursor.fetchOne();
+        //gets the first result row
+        const useridResultRow = await useridCursor.fetchOne();
 
-        if (!userid) {
+        if (!useridResultRow) {
             throw new UserNotFoundException(username)
         }
 
 
-        return userid[0];
+        return useridResultRow[0];
     }
 
     async validateUser(username, password) {
@@ -59,25 +60,36 @@ class UserHandler {
         let usercredTable = await this._table();
 
         try {
-            const useridCursor = await usercredTable
-                .select('count(user_id)')
-                .where('username = :username and password = :password')
-                .bind('username', username)
+            const useridResultRow = await this._getUserId(username);
+
+            const usernameCursor = await usercredTable
+                .select('username')
+                .where('user_id = :userid and password = :password')
+                .bind('userid', useridResultRow)
                 .bind('password', password)
                 .execute();
 
-            if (useridCursor.fetchAll().length === 1) {
+            //gets the first result row
+            const usernameRowResult = await usernameCursor.fetchOne();
+
+            if (usernameRowResult) {
 
                 //1 returned when username, password is matched in database
                 return 1;
             } else {
 
-                //0 is returned when username, password does not match in database
+                //0 is returned when username or password does not match in database
                 return 0;
             }
 
         } catch (err) {
             console.log(err);
+
+            //rethrows UserNotFoundException
+            if (err instanceof UserNotFoundException) {
+
+                throw err;
+            }
 
             //-1 is returned halted due to some other exception
             return -1;

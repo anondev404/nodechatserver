@@ -57,6 +57,14 @@ app.get('/signIn', async function (req, res) {
     } catch (err) {
         console.log(err);
 
+        //user to send message does not exits
+        if (err instanceof UserNotFoundException) {
+            res.send({
+                message: err.message
+            });
+            return;
+        }
+
         res.send({
             message: 'OOPS! cannot signin'
         });
