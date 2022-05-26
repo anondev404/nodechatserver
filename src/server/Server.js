@@ -93,7 +93,11 @@ app.post('/signUp', async function (req, res) {
     }
 });
 
+//checks if user has an active session
 const userSessionLoginValidation = (req, res, next) => {
+    /*next();
+    return;*/
+    
     if (req.session.username) {
         next();
         return;
@@ -160,6 +164,41 @@ app.get('/viewMessages', userSessionLoginValidation,
 
             res.send({
                 message: 'OOPS! Failed to fetch messages'
+            });
+        }
+    });
+
+
+app.get('/search/user', userSessionLoginValidation,
+    async function (req, res) {
+        const query = req.body;
+
+        try {
+            const userCursor = await UserHandler
+                .getHandler()
+                .searchUser(query);
+
+            const allMatchedUsers = await userCursor.fetchAll();
+
+            if (allMatchedUsers) {
+
+                res.send({
+                    allMatchedUsers: allMatchedUsers,
+                    messages: 'Matched users fetched'
+                });
+            } else {
+
+                res.send({
+                    allMatchedUsers: null,
+                    messages: 'No matching users'
+                });
+            }
+        } catch (err) {
+            console.log(err);
+
+            res.send({
+                allMatchedUsers: null,
+                message: 'OOPS! technical issues'
             });
         }
     });

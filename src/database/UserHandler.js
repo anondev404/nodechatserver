@@ -158,10 +158,42 @@ class UserHandler {
         return await msgHanlder.createMessage(senderUserId, receiverUserId, message);
     }
 
+    /*
+    takes an 'query' object
+    {
+        term: 'the query using which to search the user'
+    }
+    */
+    async searchUser(query) {
+        let usercredTable = await this._table();
+
+        try {
+            const userCursor = await usercredTable
+                .select('username')
+                .where(`username like :termLike1
+                     or username like :termLike2
+                     or username like :termLike3`)
+                .bind('termLike1', `${query.term}%`)
+                .bind('termLike2', `%${query.term}%`)
+                .bind('termLike3', `%${query.term}`)
+                .execute();
+
+            await this._closeConnection();
+
+            return userCursor;
+        } catch (err) {
+            console.log(err);
+
+            return -1;
+        }
+    }
+
+    //sets the _databaseHandler object to null
     _resetDatabaseHandler() {
         this._databaseHandler = null;
     }
 
+    //releases the database connection to pool
     async _closeConnection() {
         if (this._databaseHandler) {
             await this._databaseHandler.close();
