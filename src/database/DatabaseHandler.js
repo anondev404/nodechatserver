@@ -1,6 +1,7 @@
 const mysqlx = require('@mysql/xdevapi');
 const { databaseConfig } = require('./Config');
 
+//Database handler manages the connection to the database
 class DatabaseHandler {
     _client;
     _session;
@@ -13,6 +14,7 @@ class DatabaseHandler {
         console.log('database initilized');
     }
 
+    //sets the client with req config like pool size
     async _setClient() {
         this._client = await mysqlx.getClient(
             databaseConfig.connection,
@@ -25,6 +27,7 @@ class DatabaseHandler {
         );
     }
 
+    //sets the session by getting a connection from the pool
     async _setSession() {
         try {
             this._session = await this.client.getSession(databaseConfig.connection);
@@ -34,6 +37,7 @@ class DatabaseHandler {
         }
     }
 
+    //intilizes the schema CHATSERVER database
     async _setSchema() {
         try {
             this._schema = await this.session.getSchema(databaseConfig.schema.name);
@@ -55,6 +59,8 @@ class DatabaseHandler {
         return this._schema;
     }
 
+    //creates and initilizes DatabaseHandler object
+    //return the object
     static async getHandler() {
         let handler = new DatabaseHandler();
         await handler._init();
@@ -65,6 +71,8 @@ class DatabaseHandler {
     }
 
     get isConnectionOpen() {
+        //getConnection()_ method is private_api
+        //method declared in connection module
         return this.session.getConnection_().isOpen();
     }
 

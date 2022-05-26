@@ -166,6 +166,7 @@ app.get('/viewMessages', userSessionLoginValidation,
 
 
 
+
 app.listen(port, () => {
     console.log(`SERVER STARTED ON ${port}`)
 });
