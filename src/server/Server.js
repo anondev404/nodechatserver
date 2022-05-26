@@ -116,6 +116,15 @@ const userSessionLoginValidation = (req, res, next) => {
     });
 }
 
+app.get('/signOut', userSessionLoginValidation, async function (req, res) {
+    req.session.destroy();
+
+    res.send({
+        message: 'User signed out'
+    });
+});
+
+
 app.post('/sendMessage', userSessionLoginValidation,
     async function (req, res) {
         const info = req.body;
