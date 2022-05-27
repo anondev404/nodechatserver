@@ -60,9 +60,12 @@ class MessageHandler {
     async getConversation(userid1, userid2) {
         let messagerecTable = await this.table();
 
+        console.debug(`userid's ${userid1} ${userid2}`);
+
         let conversationCursor = await messagerecTable
             .select('sender_user_id', 'receiver_user_id', 'message', 'timelog')
-            .where('sender_user_id in (:userid1, :userid2) and receiver_user_id in (:userid1, :userid2)')
+            .where(`sender_user_id = :userid1 and receiver_user_id = :userid2
+                    or sender_user_id = :userid2 and receiver_user_id = :userid1`)
             .orderBy('timelog desc')
             .bind('userid1', userid1)
             .bind('userid2', userid2)

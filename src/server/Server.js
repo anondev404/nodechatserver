@@ -42,7 +42,7 @@ app.get('/signIn', async function (req, res) {
             req.session.username = cred.username;
 
             res.send({
-                message: 'Welcome to chatserver'
+                message: `Welcome to chatserver ${req.session.username}`
             });
         } else {
             if (flag === 0) {
@@ -158,6 +158,8 @@ app.get('/viewMessages', userSessionLoginValidation,
         const info = req.body;
 
         try {
+            console.log(`fetching messages of: ${req.session.username} ${info.receiverUsername}`);
+
             const conversationCursor = await UserHandler
                 .getHandler()
                 .getConverstation(req.session.username, info.receiverUsername);
